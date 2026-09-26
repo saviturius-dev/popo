@@ -1,0 +1,26 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@workflowos/core": ["packages/core/src/index.ts"],
+      "@workflowos/store": ["packages/store/src/index.ts"],
+      "@workflowos/llm": ["packages/llm/src/index.ts"],
+      "@workflowos/ingest": ["packages/ingest/src/index.ts"],
+      "@workflowos/discovery": ["packages/discovery/src/index.ts"],
+      "@workflowos/compiler": ["packages/compiler/src/index.ts"],
+      "@workflowos/execution": ["packages/execution/src/index.ts"],
+      "@workflowos/orchestrator": ["packages/orchestrator/src/index.ts"],
+      "@workflowos/mock-apps": ["apps/mock-apps/src/index.ts"]
+    }
+  },
+  "include": [
+    "packages/*/src/**/*.ts",
+    "packages/*/test/**/*.ts",
+    "apps/*/src/**/*.ts",
+    "apps/*/src/**/*.tsx",
+    "tests/**/*.ts",
+    "scripts/**/*.ts"
+  ],
+  "exclude": ["node_modules", "**/dist", "data"]
+}

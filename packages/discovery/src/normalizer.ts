@@ -163,7 +163,7 @@ function normalizeLabel(label: string): string {
 
 /** Keeps the path shape, drops the origin, and masks ids inside the path. */
 export function normalizeUrl(url: string): string {
-  let path = url;
+  let path: string;
   try {
     const parsed = new URL(url);
     path = parsed.pathname + (parsed.search ? parsed.search : '');

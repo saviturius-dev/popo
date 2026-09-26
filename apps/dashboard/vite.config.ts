@@ -16,12 +16,10 @@ export default defineConfig({
   root: here('.'),
   plugins: [react()],
   server: {
-    // Bound explicitly: on Windows `localhost` resolves to ::1 first, and a
-    // dashboard that only answers on IPv6 loopback is a confusing thing to
-    // debug at the point where someone is already stuck.
-    host: '127.0.0.1',
-    port: 5173,
+    host: '0.0.0.0',
+    port: 3000,
     strictPort: true,
+    allowedHosts: true,
     proxy: {
       '/api': {
         target: apiTarget,

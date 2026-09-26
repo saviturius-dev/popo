@@ -1,0 +1,8 @@
+{
+  "name": "WorkFlowOS",
+  "description": "AI agent that watches how you work, proposes workflow automations from observed activity traces, and executes them once approved.",
+  "requestFramePermissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

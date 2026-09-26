@@ -13,18 +13,12 @@ import { ReviewQueue } from './ReviewQueue.js';
 import { RunView } from './RunView.js';
 import { DiscoverControl } from './DiscoverControl.js';
 
-/**
- * Three panes, one question each.
- *
- * Left: what did the engine think it saw. Middle: what it wants to automate and
- * whether that is acceptable. Right: what it needs from a human right now. The
- * ordering is deliberate — nothing in this UI is a run control that is not also
- * a review control, because in this system those are the same decision.
- */
 export function App() {
   const [selectedId, setSelectedId] = useState<string>();
+  const [leftPaneOpen, setLeftPaneOpen] = useState(true);
+  const [rightPaneOpen, setRightPaneOpen] = useState(true);
+  const [searchFilter, setSearchFilter] = useState('');
 
-  // Any engine event invalidates the views, so the panes re-read from the API.
   const bump = useCallback(() => {
     refreshAll();
   }, []);
@@ -51,37 +45,123 @@ export function App() {
   const list = workflows.data ?? [];
   const selected = list.find((w) => w.id === selectedId) ?? list[0];
 
+  const filteredCandidates = (candidates.data ?? []).filter((c) => {
+    if (!searchFilter.trim()) return true;
+    const term = searchFilter.toLowerCase();
+    return (
+      c.appChain.some((app) => app.toLowerCase().includes(term)) ||
+      c.tokenSequence.some((tok) => tok.toLowerCase().includes(term))
+    );
+  });
+
+  const gridClass = [
+    'grid',
+    !leftPaneOpen ? 'hide-left' : '',
+    !rightPaneOpen ? 'hide-right' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
+
   return (
     <div className="app">
+      {/* Friendly Top Bar */}
       <header className="topbar">
-        <h1>WorkFlowOS</h1>
+        <div className="topbar-left">
+          <div className="terminal-title">
+            <span className="schematic-box">WORKFLOW.OS</span>
+            <h1>AI Work Assistant</h1>
+          </div>
+          <span className="spec-stamp">Smart Automator</span>
+        </div>
+
         <div className="status">
-          <span className={`dot ${connection}`} title={`event stream: ${connection}`} />
-          <span>{connection === 'live' ? 'live' : connection}</span>
-          {health.data?.busy && <span className="pill warn">run in progress</span>}
-          {health.data && (
-            <span className="pill">
-              tiers: {health.data.tiers.join(' → ')}
-            </span>
+          <div className="terminal-badge" style={{ borderColor: 'var(--term-cyan)', color: 'var(--term-cyan)' }}>
+            <span>MODEL:</span>
+            <strong>NVIDIA (KIMI-K3)</strong>
+          </div>
+
+          <div className={`terminal-badge ${connection === 'live' ? '' : 'offline'}`}>
+            <span>STATUS:</span>
+            <strong>{connection === 'live' ? 'READY & ACTIVE' : 'CONNECTING...'}</strong>
+          </div>
+
+          {health.data?.busy && (
+            <div className="terminal-badge" style={{ borderColor: 'var(--term-amber)', color: 'var(--term-amber)' }}>
+              <span>TASK:</span>
+              <strong>RUNNING</strong>
+            </div>
           )}
+
+          {/* Pane Toggles */}
+          <div style={{ display: 'flex', gap: '5px' }}>
+            <button
+              type="button"
+              className="btn-brutal secondary"
+              style={{ padding: '4px 8px', fontSize: '11px' }}
+              onClick={() => setLeftPaneOpen((v) => !v)}
+            >
+              {leftPaneOpen ? 'Hide Learned Routines' : 'Show Learned Routines'}
+            </button>
+            <button
+              type="button"
+              className="btn-brutal secondary"
+              style={{ padding: '4px 8px', fontSize: '11px' }}
+              onClick={() => setRightPaneOpen((v) => !v)}
+            >
+              {rightPaneOpen ? 'Hide Decisions' : 'Show Decisions'} {reviews.data && reviews.data.length > 0 ? `(${reviews.data.length})` : ''}
+            </button>
+          </div>
         </div>
       </header>
 
-      {health.error && <div className="banner error">Engine unreachable: {health.error}</div>}
+      {health.error && (
+        <div className="banner error" style={{ margin: '8px 16px 0' }}>
+          Connection notice: {health.error}
+        </div>
+      )}
 
-      <main className="grid">
-        <section className="pane">
-          <h2>Observed</h2>
+      <main className={gridClass}>
+        {/* PANEL 1: OBSERVED ROUTINES */}
+        <section className={`pane ${!leftPaneOpen ? 'hidden-pane' : ''}`}>
+          <div className="pane-header-terminal">
+            <h2>Learned Work Routines</h2>
+            <span className="fig-label">Observed Tasks</span>
+          </div>
+
           <DiscoverControl onDiscovered={refreshAll} />
+
           <PipelineSummary progress={progress.data ?? []} />
+
+          <div style={{ marginTop: '14px', marginBottom: '8px' }}>
+            <input
+              type="text"
+              className="input-brutal"
+              placeholder="Search apps (e.g. Gmail, Salesforce, Slack)..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+            />
+          </div>
+
+          <div className="pane-header-terminal" style={{ margin: '14px 0 10px' }}>
+            <h2 style={{ fontSize: '15px' }}>Detected Repetitive Patterns</h2>
+            <span className="fig-label">{filteredCandidates.length} found</span>
+          </div>
+
           <CandidateList
-            candidates={candidates.data ?? []}
+            candidates={filteredCandidates}
             workflows={list}
+            selectedWorkflowId={selected?.id}
             onOpen={(id) => setSelectedId(id)}
           />
         </section>
 
+        {/* PANEL 2: WORKFLOW CANVASS */}
         <section className="pane wide">
+          <div className="pane-header-terminal">
+            <h2>Proposed Automation Plan</h2>
+            <span className="fig-label">Review & Run</span>
+          </div>
+
           {selected ? (
             <WorkflowView
               key={selected.id}
@@ -90,16 +170,35 @@ export function App() {
               onChanged={refreshAll}
             />
           ) : (
-            <p className="empty">
-              No workflows yet. Press Discover in the left pane to observe a recorded trace.
-            </p>
+            <div className="blueprint-card" style={{ padding: '36px 20px', textAlign: 'center', marginTop: '20px' }}>
+              <h3 style={{ margin: '0 0 8px', color: '#fff', fontSize: '16px' }}>
+                No Automation Selected Yet
+              </h3>
+              <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '0 auto 16px', maxWidth: '420px', lineHeight: 1.5 }}>
+                Choose an example from the left column (such as <strong>Customer Request & Support Reply</strong>) and click <em>Watch & Learn This Routine</em> to see how WorkFlowOS turns it into an automatic workflow.
+              </p>
+            </div>
           )}
         </section>
 
-        <section className="pane">
-          <h2>Needs you</h2>
+        {/* PANEL 3: HUMAN IN THE LOOP DECISIONS */}
+        <section className={`pane ${!rightPaneOpen ? 'hidden-pane' : ''}`}>
+          <div className="pane-header-terminal">
+            <h2>Needs Your Permission</h2>
+            <span className="fig-label">Safety Gate</span>
+          </div>
+
           <ReviewQueue reviews={reviews.data ?? []} onAnswered={refreshAll} />
-          {activeRun ? <RunView run={activeRun} onChanged={refreshAll} /> : null}
+
+          {activeRun && (
+            <div style={{ marginTop: '20px' }}>
+              <div className="pane-header-terminal">
+                <h2 style={{ fontSize: '15px' }}>Live Progress</h2>
+                <span className="fig-label">Automation Activity</span>
+              </div>
+              <RunView run={activeRun} onChanged={refreshAll} />
+            </div>
+          )}
         </section>
       </main>
     </div>
@@ -107,63 +206,101 @@ export function App() {
 }
 
 function PipelineSummary({ progress }: { progress: PipelineProgress[] }) {
-  if (progress.length === 0) return <p className="empty">No trace ingested yet.</p>;
+  if (progress.length === 0) return null;
   return (
-    <ul className="progress">
+    <div style={{ marginBottom: '14px' }}>
       {progress.slice(0, 3).map((p) => (
-        <li key={p.traceId}>
-          <span className={`stage ${p.stage}`}>{p.stage}</span>
-          <span className="muted">
-            {p.eventsIngested} events · {p.candidates} candidate(s)
-          </span>
-          {p.error ? <span className="muted error">{p.error}</span> : null}
-        </li>
+        <div key={p.traceId} className="blueprint-card" style={{ padding: '8px 10px', marginBottom: '6px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
+            <span style={{ color: 'var(--term-cyan)' }}>Learning status: {p.stage === 'done' ? 'Completed' : 'In Progress'}</span>
+            <span style={{ color: 'var(--text-muted)' }}>{p.eventsIngested} actions analyzed</span>
+          </div>
+        </div>
       ))}
-    </ul>
+    </div>
   );
 }
 
 function CandidateList({
   candidates,
   workflows,
+  selectedWorkflowId,
   onOpen,
 }: {
   candidates: CandidateWorkflow[];
   workflows: WorkflowIR[];
+  selectedWorkflowId?: string;
   onOpen(id: string): void;
 }) {
-  if (candidates.length === 0) return <p className="empty">No repeated pattern detected.</p>;
+  if (candidates.length === 0) {
+    return (
+      <div className="blueprint-card" style={{ padding: '16px', textAlign: 'center' }}>
+        <span style={{ color: 'var(--text-dim)', fontSize: '12px' }}>
+          No repetitive routines found matching this filter.
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <ul className="candidates">
+    <div>
       {candidates.map((candidate) => {
         const workflow = workflows.find((w) => w.candidateId === candidate.id);
+        const isSelected = workflow && workflow.id === selectedWorkflowId;
+
         return (
-          <li key={candidate.id}>
-            <button
-              type="button"
-              className="link"
-              disabled={!workflow}
-              onClick={() => workflow && onOpen(workflow.id)}
-            >
-              {candidate.appChain.join(' → ')}
-            </button>
-            <div className="muted">
-              {candidate.occurrences.length}× · score {candidate.score.total.toFixed(2)} ·{' '}
-              {candidate.score.crossAppTransitions} app transition(s)
+          <div
+            key={candidate.id}
+            className={`candidate-schematic-card ${isSelected ? 'selected' : ''}`}
+            onClick={() => workflow && onOpen(workflow.id)}
+          >
+            <div className="chain-blocks">
+              {candidate.appChain.map((app, idx) => (
+                <span key={`${app}-${idx}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                  <span className={`schematic-app-block ${getAppTag(app)}`}>
+                    {getFriendlyAppName(app)}
+                  </span>
+                  {idx < candidate.appChain.length - 1 && (
+                    <span className="connector-arrow">➔</span>
+                  )}
+                </span>
+              ))}
             </div>
-            <details>
-              <summary>token sequence</summary>
-              <ol className="tokens">
-                {candidate.tokenSequence.map((token) => (
-                  <li key={token}>{token}</li>
-                ))}
-              </ol>
-            </details>
-          </li>
+
+            <div style={{ display: 'flex', gap: '8px', fontSize: '11.5px', color: 'var(--text-muted)' }}>
+              <span>Observed <strong>{candidate.occurrences.length} times</strong></span>
+              <span>·</span>
+              <span>Confidence: <strong style={{ color: 'var(--term-cyan)' }}>{(candidate.score.total * 100).toFixed(0)}%</strong></span>
+            </div>
+            
+            <div style={{ fontSize: '10.5px', color: 'var(--term-cyan)', marginTop: '6px' }}>
+              Click to inspect & approve this automation →
+            </div>
+          </div>
         );
       })}
-    </ul>
+    </div>
   );
+}
+
+function getFriendlyAppName(app: string): string {
+  const l = app.toLowerCase();
+  if (l.includes('gmail') || l.includes('mail')) return 'Gmail';
+  if (l.includes('crm') || l.includes('deal') || l.includes('customer')) return 'CRM';
+  if (l.includes('salesforce')) return 'Salesforce';
+  if (l.includes('slack') || l.includes('chat')) return 'Slack';
+  if (l.includes('jira')) return 'Jira';
+  if (l.includes('github')) return 'GitHub';
+  if (l.includes('pagerduty')) return 'PagerDuty';
+  return app;
+}
+
+function getAppTag(app: string): string {
+  const l = app.toLowerCase();
+  if (l.includes('gmail') || l.includes('mail')) return 'gmail';
+  if (l.includes('crm') || l.includes('deal') || l.includes('customer') || l.includes('salesforce')) return 'crm';
+  if (l.includes('slack') || l.includes('chat')) return 'slack';
+  return 'generic';
 }
 
 export type { RunRecord };

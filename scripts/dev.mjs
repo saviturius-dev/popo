@@ -15,7 +15,7 @@ import { join } from 'node:path';
 const isWindows = process.platform === 'win32';
 const bin = (name) => (isWindows ? `${name}.cmd` : name);
 
-const apiPort = Number(process.env.PORT ?? 4310);
+const apiPort = Number(process.env.WORKFLOWOS_API_PORT ?? 4310);
 const children = [];
 let shuttingDown = false;
 
@@ -61,7 +61,7 @@ function startRest() {
     WORKFLOWOS_DB: dbFile,
     WORKFLOWOS_ENDPOINTS_FILE: endpointsFile,
   });
-  start('dashboard', bin('npx'), ['vite', '--config', 'apps/dashboard/vite.config.ts'], {
+  start('dashboard', bin('npx'), ['vite', '--config', 'apps/dashboard/vite.config.ts', '--host', '0.0.0.0', '--port', '3000'], {
     WORKFLOWOS_API: `http://127.0.0.1:${apiPort}`,
   });
 }

@@ -9,6 +9,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@workflowos/core": "workspace:*"
+    "@workflowos/core": "*"
   }
 }

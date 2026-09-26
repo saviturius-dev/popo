@@ -9,13 +9,13 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@workflowos/compiler": "workspace:*",
-    "@workflowos/core": "workspace:*",
-    "@workflowos/discovery": "workspace:*",
-    "@workflowos/execution": "workspace:*",
-    "@workflowos/ingest": "workspace:*",
-    "@workflowos/llm": "workspace:*",
-    "@workflowos/store": "workspace:*",
+    "@workflowos/compiler": "*",
+    "@workflowos/core": "*",
+    "@workflowos/discovery": "*",
+    "@workflowos/execution": "*",
+    "@workflowos/ingest": "*",
+    "@workflowos/llm": "*",
+    "@workflowos/store": "*",
     "cors": "^2.8.5",
     "express": "^4.21.2",
     "zod": "^3.24.1"

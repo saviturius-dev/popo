@@ -27,7 +27,8 @@ const patchSchema = z.object({
 
 const ingestSchema = z.object({
   traceId: z.string().min(1),
-  path: z.string().min(1),
+  path: z.string().min(1).optional(),
+  content: z.string().optional(),
   minSupport: z.number().int().min(2).max(50).optional(),
   minScore: z.number().min(0).max(1).optional(),
 });
@@ -96,7 +97,11 @@ export function createApiServer(orchestrator: Orchestrator): express.Express {
    */
   app.post('/api/ingest', wrap(async (req, res) => {
     const body = ingestSchema.parse(req.body ?? {});
-    const source = new ReplaySource({ traceId: body.traceId, path: body.path });
+    const source = new ReplaySource({
+      traceId: body.traceId,
+      path: body.path,
+      content: body.content,
+    });
     const result = await orchestrator.ingest(source, {
       minSupport: body.minSupport,
       minScore: body.minScore,

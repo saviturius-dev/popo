@@ -1,13 +1,6 @@
 import { useState } from 'react';
 import { api, type RunRecord } from './api.js';
 
-/**
- * The run journal.
- *
- * The tier a step actually used is shown next to the tier the compiler
- * preferred, because that difference is the most useful thing the operator can
- * learn: it is how a flaky mechanism gets demoted on the next run.
- */
 export function RunView({ run, onChanged }: { run: RunRecord; onChanged(): void }) {
   const [expanded, setExpanded] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -23,49 +16,89 @@ export function RunView({ run, onChanged }: { run: RunRecord; onChanged(): void 
     }
   }
 
+  const succeededCount = run.steps.filter((s) => s.status === 'succeeded').length;
+
   return (
-    <article className="run">
-      <header>
-        <h3>Run {run.id}</h3>
-        <span className={`pill status-${run.status}`}>{run.status}</span>
+    <div className="blueprint-card">
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+        <div>
+          <div style={{ fontSize: '11px', color: 'var(--term-cyan)', fontWeight: 600 }}>
+            CURRENT AUTOMATION RUN
+          </div>
+          <span className={`cad-pill status-${run.status}`}>
+            {run.status === 'running' ? 'In Progress' : run.status === 'succeeded' ? 'Completed Successfully' : run.status}
+          </span>
+        </div>
+
         {busy_ && (
-          <button type="button" className="secondary" disabled={busy} onClick={abort}>
-            Abort
+          <button type="button" className="btn-brutal danger" style={{ padding: '4px 10px', fontSize: '11px' }} disabled={busy} onClick={abort}>
+            Stop Automation
           </button>
         )}
-      </header>
-      <div className="muted">
-        {run.steps.filter((s) => s.status === 'succeeded').length}/{run.steps.length} steps ·{' '}
-        {run.partialEffects.length} effect(s)
-        {run.abortReason ? ` · ${run.abortReason}` : ''}
       </div>
-      {run.error && <p className="banner error">{run.error}</p>}
 
-      <ol className="runsteps">
+      <div style={{ fontSize: '12px', color: 'var(--text-muted)', margin: '6px 0' }}>
+        Progress: <strong>{succeededCount} of {run.steps.length} steps</strong> completed
+      </div>
+
+      {run.error && <div className="banner error">{run.error}</div>}
+
+      {/* Friendly Step Rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', margin: '10px 0' }}>
         {run.steps.map((stepRun) => (
-          <li key={stepRun.stepId} className={`runstep ${stepRun.status}`}>
-            <span className={`pill status-${stepRun.status}`}>{stepRun.status}</span>
-            <span className="label">{stepRun.label}</span>
-            <span className="pill">{stepRun.tier}</span>
-            {stepRun.attempts > 1 && <span className="pill warn">{stepRun.attempts} tries</span>}
-            {stepRun.healedSelector && <span className="pill warn">healed</span>}
-            {stepRun.error && <span className="muted error">{stepRun.error}</span>}
-          </li>
-        ))}
-      </ol>
+          <div
+            key={stepRun.stepId}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              padding: '7px 10px',
+              background: '#192014',
+              border: '1px solid var(--border-raw)',
+              fontSize: '11.5px',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ color: stepRun.status === 'succeeded' ? 'var(--term-green)' : stepRun.status === 'failed' ? 'var(--term-crimson)' : 'var(--term-cyan)' }}>
+                {stepRun.status === 'succeeded' ? '✓' : stepRun.status === 'failed' ? '✗' : '•'}
+              </span>
+              <span style={{ color: '#fff' }}>{cleanStepName(stepRun.label)}</span>
+            </div>
 
-      <button type="button" className="secondary" onClick={() => setExpanded((v) => !v)}>
-        {expanded ? 'Hide log' : 'Show log'}
+            <div style={{ display: 'flex', gap: '5px' }}>
+              <span className="spec-stamp">
+                {stepRun.status === 'succeeded' ? 'Done' : stepRun.status === 'running' ? 'Working...' : 'Pending'}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        className="btn-brutal secondary"
+        style={{ width: '100%', fontSize: '11px', padding: '6px' }}
+        onClick={() => setExpanded((v) => !v)}
+      >
+        {expanded ? '▲ Hide Activity Details' : '▼ Show Activity Details'}
       </button>
+
       {expanded && (
-        <ul className="log">
+        <ul className="terminal-log-view">
           {run.log.map((entry, i) => (
-            <li key={i} className={entry.level}>
+            <li key={i} className={entry.level} style={{ fontSize: '11px' }}>
               {entry.message}
             </li>
           ))}
         </ul>
       )}
-    </article>
+    </div>
   );
+}
+
+function cleanStepName(label: string): string {
+  return label
+    .replace(/navigate to /i, 'Open ')
+    .replace(/click /i, 'Click ')
+    .replace(/type /i, 'Fill in ');
 }

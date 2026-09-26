@@ -60,6 +60,7 @@ export class BrowserPool {
     this.browser = await chromium.launch({
       headless: this.options.headless ?? true,
       slowMo: this.options.slowMo ?? 0,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
     });
     return this.browser;
   }

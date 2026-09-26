@@ -39,10 +39,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<Health>('/health'),
-  ingest: (traceId: string, path: string) =>
+  ingest: (traceId: string, path?: string, content?: string) =>
     request<{ candidates: unknown[]; workflows: { id: string; name: string }[] }>('/ingest', {
       method: 'POST',
-      body: JSON.stringify({ traceId, path }),
+      body: JSON.stringify({ traceId, path, content }),
     }),
   progress: () => request<PipelineProgress[]>('/progress'),
   candidates: () => request<CandidateWorkflow[]>('/candidates'),

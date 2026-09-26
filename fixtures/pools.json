@@ -1,0 +1,20 @@
+{
+  "priya.nair@northwind.example": {
+    "customer": "Priya Nair",
+    "email": "priya.nair@northwind.example",
+    "company": "Northwind",
+    "num": "10001",
+    "subject": "Invoice dispute on order 10001",
+    "note": "Customer reported a billing error on the most recent invoice and asked for a refund review.",
+    "attachment": "invoice-dispute-10001.pdf"
+  },
+  "marcus.delgado@contoso.example": {
+    "customer": "Marcus Delgado",
+    "email": "marcus.delgado@contoso.example",
+    "company": "Contoso",
+    "num": "10002",
+    "subject": "Shipping delay for order 10002",
+    "note": "Customer escalated a shipping delay and needs a delivery date commitment.",
+    "attachment": "shipping-delay-10002.pdf"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "trace": "d-one-off-only",
+  "traceId": "d_one_off",
+  "stats": {
+    "events": 16,
+    "sessions": 4,
+    "rawCandidates": 0,
+    "candidates": 0
+  },
+  "candidates": [],
+  "workflows": []
+}

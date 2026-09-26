@@ -1,0 +1,78 @@
+{
+  "id": "one-off-activity",
+  "label": "Assorted one-off work",
+  "repeat": 4,
+  "startTs": 1767225600000,
+  "baseGapMs": 2700000,
+  "noise": {
+    "extraClickRate": 0.1,
+    "typoRate": 0,
+    "idleRate": 0,
+    "optionalJitterRate": 0,
+    "interleaveBrowsing": 1
+  },
+  "pools": [
+    {
+      "customer": "Ibrahim Saleh",
+      "email": "ibrahim.saleh@initech.example",
+      "company": "Initech",
+      "num": "30001",
+      "subject": "Renewal paperwork for Initech",
+      "note": "One-off paperwork request.",
+      "attachment": "renewal-initech.docx"
+    },
+    {
+      "customer": "Wren Castillo",
+      "email": "wren.castillo@soylent.example",
+      "company": "Soylent",
+      "num": "30002",
+      "subject": "Vendor onboarding for Soylent",
+      "note": "One-off onboarding request.",
+      "attachment": "onboarding-soylent.docx"
+    },
+    {
+      "customer": "Yusuf Bergstrom",
+      "email": "yusuf.bergstrom@globex.example",
+      "company": "Globex",
+      "num": "30003",
+      "subject": "Security questionnaire for Globex",
+      "note": "One-off questionnaire request.",
+      "attachment": "questionnaire-globex.docx"
+    },
+    {
+      "customer": "Nadia Okonkwo",
+      "email": "nadia.okonkwo@umbrella.example",
+      "company": "Umbrella",
+      "num": "30004",
+      "subject": "Access review for Umbrella",
+      "note": "One-off access review request.",
+      "attachment": "access-review-umbrella.docx"
+    }
+  ],
+  "instances": [
+    {
+      "app": { "id": "outlook", "name": "Outlook (web)", "kind": "web" },
+      "action": { "type": "navigate" },
+      "target": { "url": "http://outlook.mock/mail/{{company}}" },
+      "delayMs": 2000
+    },
+    {
+      "app": { "id": "outlook", "name": "Outlook (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Archive {{company}} thread", "strategy": "role-name" },
+      "delayMs": 2400
+    },
+    {
+      "app": { "id": "notion-desktop", "name": "Notion (desktop)", "kind": "desktop" },
+      "action": { "type": "navigate" },
+      "target": { "windowTitle": "{{company}} notes - Notion" },
+      "delayMs": 3100
+    },
+    {
+      "app": { "id": "notion-desktop", "name": "Notion (desktop)", "kind": "desktop" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Rename page to {{company}}", "strategy": "uia" },
+      "delayMs": 2800
+    }
+  ]
+}

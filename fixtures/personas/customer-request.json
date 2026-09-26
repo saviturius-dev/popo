@@ -1,0 +1,119 @@
+{
+  "id": "customer-request",
+  "label": "Process Customer Request",
+  "repeat": 5,
+  "startTs": 1767225600000,
+  "baseGapMs": 1800000,
+  "noise": {
+    "extraClickRate": 0.35,
+    "typoRate": 0.1,
+    "idleRate": 0.12,
+    "optionalJitterRate": 0.5,
+    "interleaveBrowsing": 3
+  },
+  "pools": [
+    {
+      "customer": "Priya Nair",
+      "email": "priya.nair@northwind.example",
+      "company": "Northwind",
+      "num": "10001",
+      "subject": "Invoice dispute on order 10001",
+      "note": "Customer reported a billing error on the most recent invoice and asked for a refund review.",
+      "attachment": "invoice-dispute-10001.pdf"
+    },
+    {
+      "customer": "Marcus Delgado",
+      "email": "marcus.delgado@contoso.example",
+      "company": "Contoso",
+      "num": "10002",
+      "subject": "Shipping delay for order 10002",
+      "note": "Customer escalated a shipping delay and needs a delivery date commitment.",
+      "attachment": "shipping-delay-10002.pdf"
+    }
+  ],
+  "instances": [
+    {
+      "app": { "id": "gmail", "name": "Gmail (web)", "kind": "web" },
+      "action": { "type": "navigate" },
+      "target": { "url": "http://gmail.mock/inbox" },
+      "delayMs": 1500
+    },
+    {
+      "app": { "id": "gmail", "name": "Gmail (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "link", "name": "Next request", "strategy": "role-name" },
+      "delayMs": 2200
+    },
+    {
+      "app": { "id": "gmail", "name": "Gmail (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Download attachment", "strategy": "role-name" },
+      "delayMs": 1800
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "navigate" },
+      "target": { "url": "http://crm.mock/customers" },
+      "delayMs": 2600
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "type" },
+      "element": { "role": "textbox", "name": "Search customers", "strategy": "role-name" },
+      "value": { "template": "{{email}}" },
+      "delayMs": 3400
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Run search", "strategy": "role-name" },
+      "delayMs": 1400
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "link", "name": "Open record", "strategy": "role-name" },
+      "delayMs": 1600
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "type" },
+      "element": { "role": "textbox", "name": "Request notes", "strategy": "role-name" },
+      "value": { "template": "{{note}}" },
+      "delayMs": 4200
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "type" },
+      "element": { "role": "textbox", "name": "Attachment", "strategy": "role-name" },
+      "value": { "template": "{{attachment}}" },
+      "delayMs": 2100,
+      "optional": true
+    },
+    {
+      "app": { "id": "crm", "name": "Customer.io CRM (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Update record", "strategy": "role-name" },
+      "delayMs": 1300
+    },
+    {
+      "app": { "id": "slack", "name": "Slack (web)", "kind": "web" },
+      "action": { "type": "navigate" },
+      "target": { "url": "http://slack.mock/channel/support" },
+      "delayMs": 2400
+    },
+    {
+      "app": { "id": "slack", "name": "Slack (web)", "kind": "web" },
+      "action": { "type": "type" },
+      "element": { "role": "textbox", "name": "Message", "strategy": "role-name" },
+      "value": { "template": "Logged request from {{customer}} ({{email}}): {{note}}" },
+      "delayMs": 3800
+    },
+    {
+      "app": { "id": "slack", "name": "Slack (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Send", "strategy": "role-name" },
+      "delayMs": 1100
+    }
+  ]
+}

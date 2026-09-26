@@ -1,0 +1,315 @@
+{
+  "trace": "a-customer-request-clean",
+  "traceId": "a_customer_request",
+  "stats": {
+    "events": 65,
+    "sessions": 5,
+    "rawCandidates": 1,
+    "candidates": 1
+  },
+  "candidates": [
+    {
+      "id": "cand_b7565db7",
+      "appChain": [
+        "gmail",
+        "crm",
+        "slack"
+      ],
+      "tokenSequence": [
+        "gmail:navigate:url=/inbox",
+        "gmail:click:role=link:name=next request",
+        "gmail:click:role=button:name=download attachment",
+        "crm:navigate:url=/customers",
+        "crm:type:role=textbox:name=search customers:value=<email>",
+        "crm:click:role=button:name=run search",
+        "crm:click:role=link:name=open record",
+        "crm:type:role=textbox:name=request notes:value=<text>",
+        "crm:type:role=textbox:name=attachment:value=<text>",
+        "crm:click:role=button:name=update record",
+        "slack:navigate:url=/channel/support",
+        "slack:type:role=textbox:name=message:value=<text>",
+        "slack:click:role=button:name=send"
+      ],
+      "occurrenceCount": 5,
+      "meanSimilarity": 1,
+      "score": {
+        "support": 1,
+        "duration": 0.954,
+        "crossAppTransitions": 1,
+        "consistency": 1,
+        "noisePenalty": 0,
+        "total": 0.993
+      }
+    }
+  ],
+  "workflows": [
+    {
+      "name": "Process Customer Request",
+      "risk": "irreversible",
+      "status": "candidate",
+      "degraded": false,
+      "trigger": {
+        "type": "event",
+        "description": "A new message appears in the mailbox"
+      },
+      "variables": [
+        {
+          "name": "v_email_1",
+          "type": "email",
+          "required": true
+        },
+        {
+          "name": "v_text_1",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "v_text_2",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "v_text_3",
+          "type": "string",
+          "required": true
+        },
+        {
+          "name": "attachmentPath",
+          "type": "string",
+          "required": false
+        },
+        {
+          "name": "v_record_id",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "steps": [
+        {
+          "action": "navigate",
+          "label": "Open \"http://gmail.mock/inbox\"",
+          "app": "gmail",
+          "risk": "read",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "destination": "http://gmail.mock/inbox"
+          },
+          "outputs": {},
+          "selector": null
+        },
+        {
+          "action": "click",
+          "label": "Click \"Next request\"",
+          "app": "gmail",
+          "risk": "read",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {},
+          "outputs": {},
+          "selector": "role-name:link:next request"
+        },
+        {
+          "action": "download",
+          "label": "Click \"Download attachment\"",
+          "app": "gmail",
+          "risk": "write",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {},
+          "outputs": {
+            "attachmentPath": "attachmentPath"
+          },
+          "selector": "role-name:button:download attachment"
+        },
+        {
+          "action": "navigate",
+          "label": "Open \"http://crm.mock/customers\"",
+          "app": "crm",
+          "risk": "read",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "destination": "http://crm.mock/customers"
+          },
+          "outputs": {},
+          "selector": null
+        },
+        {
+          "action": "type",
+          "label": "Type into \"Search customers\"",
+          "app": "crm",
+          "risk": "write",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "field": "{{v_email_1}}"
+          },
+          "outputs": {},
+          "selector": "role-name:textbox:search customers"
+        },
+        {
+          "action": "click",
+          "label": "Click \"Run search\"",
+          "app": "crm",
+          "risk": "read",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {},
+          "outputs": {},
+          "selector": "role-name:button:run search"
+        },
+        {
+          "action": "click",
+          "label": "Click \"Open record\"",
+          "app": "crm",
+          "risk": "read",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {},
+          "outputs": {
+            "recordId": "v_record_id"
+          },
+          "selector": "role-name:link:open record"
+        },
+        {
+          "action": "type",
+          "label": "Type into \"Request notes\"",
+          "app": "crm",
+          "risk": "write",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "field": "{{v_text_1}}"
+          },
+          "outputs": {},
+          "selector": "role-name:textbox:request notes"
+        },
+        {
+          "action": "type",
+          "label": "Type into \"Attachment\"",
+          "app": "crm",
+          "risk": "write",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "field": "{{v_text_2}}"
+          },
+          "outputs": {},
+          "selector": "role-name:textbox:attachment"
+        },
+        {
+          "action": "click",
+          "label": "Click \"Update record\"",
+          "app": "crm",
+          "risk": "write",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {},
+          "outputs": {},
+          "selector": "role-name:button:update record"
+        },
+        {
+          "action": "navigate",
+          "label": "Open \"http://slack.mock/channel/support\"",
+          "app": "slack",
+          "risk": "read",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "destination": "http://slack.mock/channel/support"
+          },
+          "outputs": {},
+          "selector": null
+        },
+        {
+          "action": "type",
+          "label": "Type into \"Message\"",
+          "app": "slack",
+          "risk": "write",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "field": "{{v_text_3}}"
+          },
+          "outputs": {},
+          "selector": "role-name:textbox:message"
+        },
+        {
+          "action": "send",
+          "label": "Click \"Send\"",
+          "app": "slack",
+          "risk": "irreversible",
+          "resolveTier": [
+            "web-semantic",
+            "browser-automation",
+            "cv-fallback"
+          ],
+          "confidence": 1,
+          "inputs": {
+            "payload": "{{v_text_3}}"
+          },
+          "outputs": {},
+          "selector": "role-name:button:send"
+        }
+      ],
+      "conditions": [
+        {
+          "operator": "not_empty",
+          "onFail": "escalate",
+          "when": {
+            "variable": "v_record_id"
+          }
+        }
+      ]
+    }
+  ]
+}

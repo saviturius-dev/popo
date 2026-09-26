@@ -1,0 +1,85 @@
+{
+  "id": "weekly-report",
+  "label": "Publish Weekly Report",
+  "repeat": 4,
+  "startTs": 1767225600000,
+  "baseGapMs": 5400000,
+  "noise": {
+    "extraClickRate": 0.1,
+    "typoRate": 0.05,
+    "idleRate": 0,
+    "optionalJitterRate": 0,
+    "interleaveBrowsing": 1
+  },
+  "pools": [
+    {
+      "customer": "Dana Whitfield",
+      "email": "dana.whitfield@initech.example",
+      "company": "Initech",
+      "num": "20001",
+      "subject": "Weekly pipeline summary week 12",
+      "note": "Pipeline summary for week 12: 14 new opportunities, 3 closed.",
+      "attachment": "pipeline-week-12.xlsx"
+    },
+    {
+      "customer": "Sam Whitfield",
+      "email": "sam.whitfield@umbrella.example",
+      "company": "Umbrella",
+      "num": "20002",
+      "subject": "Weekly pipeline summary week 13",
+      "note": "Pipeline summary for week 13: 9 new opportunities, 5 closed.",
+      "attachment": "pipeline-week-13.xlsx"
+    }
+  ],
+  "instances": [
+    {
+      "app": { "id": "excel-desktop", "name": "Excel (desktop)", "kind": "desktop" },
+      "action": { "type": "launch" },
+      "target": { "windowTitle": "pipeline-week-{{num}}.xlsx - Excel" },
+      "delayMs": 2600
+    },
+    {
+      "app": { "id": "excel-desktop", "name": "Excel (desktop)", "kind": "desktop" },
+      "action": { "type": "click" },
+      "element": { "role": "tab", "name": "Summary", "strategy": "uia" },
+      "delayMs": 1900
+    },
+    {
+      "app": { "id": "excel-desktop", "name": "Excel (desktop)", "kind": "desktop" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Refresh figures", "strategy": "uia" },
+      "delayMs": 4200
+    },
+    {
+      "app": { "id": "excel-desktop", "name": "Excel (desktop)", "kind": "desktop" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Copy summary", "strategy": "uia" },
+      "delayMs": 1500
+    },
+    {
+      "app": { "id": "outlook", "name": "Outlook (web)", "kind": "web" },
+      "action": { "type": "navigate" },
+      "target": { "url": "http://outlook.mock/compose" },
+      "delayMs": 2200
+    },
+    {
+      "app": { "id": "outlook", "name": "Outlook (web)", "kind": "web" },
+      "action": { "type": "type" },
+      "element": { "role": "textbox", "name": "Subject", "strategy": "role-name" },
+      "value": { "template": "{{subject}}" },
+      "delayMs": 3600
+    },
+    {
+      "app": { "id": "outlook", "name": "Outlook (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Paste", "strategy": "role-name" },
+      "delayMs": 1700
+    },
+    {
+      "app": { "id": "outlook", "name": "Outlook (web)", "kind": "web" },
+      "action": { "type": "click" },
+      "element": { "role": "button", "name": "Send", "strategy": "role-name" },
+      "delayMs": 1200
+    }
+  ]
+}
